@@ -8,7 +8,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { DriverService } from '../../drivers/driver.service';
 import { RendicionService } from '../rendicion.service';
-import { RendicionExcelService } from '../rendicion-excel.service';
 import { RendicionStatus } from '../rendicion.model';
 
 @Component({
@@ -29,10 +28,6 @@ import { RendicionStatus } from '../rendicion.model';
 export class RendicionListComponent {
   private readonly rendicionService = inject(RendicionService);
   private readonly driverService = inject(DriverService);
-  private readonly rendicionExcelService = inject(RendicionExcelService);
-
-  readonly exportingId = signal<string | null>(null);
-  readonly exportingAll = signal(false);
 
   readonly displayedColumns = [
     'period',
@@ -88,62 +83,5 @@ export class RendicionListComponent {
     if (confirmed) {
       this.rendicionService.delete(id);
     }
-  }
-
-  async exportExcel(id: string): Promise<void> {
-    const rendicion = this.rendicionService.getById(id);
-    if (!rendicion) return;
-
-    this.exportingId.set(id);
-    try {
-      await this.rendicionExcelService.export(rendicion);
-    } catch (err) {
-      console.error(err);
-      alert('No se pudo generar el Excel. Revisá la consola para más detalle.');
-    } finally {
-      this.exportingId.set(null);
-    }
-  }
-
-  async exportAllExcel(): Promise<void> {
-    this.exportingAll.set(true);
-    try {
-      await this.rendicionExcelService.exportAll(this.rows().map((r) => r.rendicion));
-    } catch (err) {
-      console.error(err);
-      alert('No se pudo generar el Excel. Revisá la consola para más detalle.');
-    } finally {
-      this.exportingAll.set(false);
-    }
-  }
-
-  exportCsv(): void {
-    const header = ['Desde', 'Hasta', 'Vehículo', 'Chofer', 'Litros', 'Combustible ($)', 'Gastos extra ($)', 'Total ($)', 'Km recorridos', 'Rendimiento (L/100km)', 'Siniestros', 'Estado'];
-    const lines = this.rows().map((row) => [
-      row.rendicion.periodStart,
-      row.rendicion.periodEnd,
-      row.rendicion.vehicleLabel,
-      row.driverName,
-      row.fuelLiters.toFixed(1),
-      row.fuelSpent.toFixed(2),
-      row.extrasTotal.toFixed(2),
-      row.total.toFixed(2),
-      row.km ? row.km.toFixed(0) : '',
-      row.litersPer100km != null ? row.litersPer100km.toFixed(1) : '',
-      String(row.rendicion.incidents.length),
-      row.rendicion.status,
-    ]);
-
-    const csv = [header, ...lines]
-      .map((cols) => cols.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
-
-    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `rendiciones-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
   }
 }
