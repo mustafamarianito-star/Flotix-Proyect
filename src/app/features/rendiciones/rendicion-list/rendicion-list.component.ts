@@ -29,10 +29,10 @@ export class RendicionListComponent {
   private readonly rendicionService = inject(RendicionService);
   private readonly driverService = inject(DriverService);
 
-  // URL del dashboard de Looker Studio con las métricas de rendiciones.
-  // Reemplazá con la URL de tu dashboard: https://lookerstudio.google.com/reporting/{REPORT_ID}
-  // Ver documentation/Integracion-Looker-Studio.md para crear el dashboard.
-  readonly lookerUrl = 'https://lookerstudio.google.com/reporting/REEMPLAZA-CON-TU-REPORT-ID';
+  // URL del dashboard de Looker Studio "Rendiciones - Flotix" (KPIs, serie
+  // mensual de ingresos/gastos/resultado y tabla de rendiciones).
+  // Ver documentation/Integracion-Looker-Studio.md para su configuración.
+  readonly lookerUrl = 'https://lookerstudio.google.com/reporting/8793b9b1-3a59-4ed9-9bad-cbdd5e475070';
 
   readonly displayedColumns = [
     'period',
