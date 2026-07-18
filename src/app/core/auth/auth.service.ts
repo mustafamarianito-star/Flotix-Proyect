@@ -28,9 +28,25 @@ export class AuthService {
   async loginWithGoogle(): Promise<void> {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/dashboard` },
+      options: { redirectTo: new URL('dashboard', document.baseURI).toString() },
     });
     if (error) throw error;
+  }
+
+  async loginWithEmail(email: string, password: string): Promise<void> {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+  }
+
+  /** Devuelve `true` si la cuenta queda lista para usar de inmediato (sin confirmación de email pendiente). */
+  async signUpWithEmail(email: string, password: string, fullName: string): Promise<boolean> {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: fullName } },
+    });
+    if (error) throw error;
+    return data.session !== null;
   }
 
   async logout(): Promise<void> {

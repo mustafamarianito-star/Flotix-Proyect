@@ -25,8 +25,12 @@
     <div class="login-card">
       <img src="assets/flotix-app-icon-square.svg" alt="Flotix" class="card-logo" />
       <span class="eyebrow">Bienvenido</span>
-      <h2>Iniciá sesión</h2>
-      <p class="subtitle">Accedé con tu cuenta de Google para continuar.</p>
+      <h2>{{ mode() === 'signup' ? 'Creá tu cuenta' : 'Iniciá sesión' }}</h2>
+      <p class="subtitle">
+        {{ mode() === 'signup'
+          ? 'Registrate con tu email para acceder al equipo.'
+          : 'Accedé con Google o con tu email y contraseña.' }}
+      </p>
 
       <button class="google-btn" [disabled]="loading()" (click)="loginWithGoogle()">
         @if (loading()) {
@@ -38,10 +42,56 @@
         }
       </button>
 
+      <div class="divider"><span>o</span></div>
+
+      <form class="email-form" (ngSubmit)="submitEmailForm()">
+        @if (mode() === 'signup') {
+          <label class="field">
+            <span>Nombre</span>
+            <input type="text" name="fullName" [(ngModel)]="fullName" autocomplete="name" required />
+          </label>
+        }
+        <label class="field">
+          <span>Email</span>
+          <input type="email" name="email" [(ngModel)]="email" autocomplete="email" required />
+        </label>
+        <label class="field">
+          <span>Contraseña</span>
+          <input
+            type="password"
+            name="password"
+            [(ngModel)]="password"
+            [attr.autocomplete]="mode() === 'signup' ? 'new-password' : 'current-password'"
+            required
+          />
+        </label>
+
+        <button type="submit" class="email-btn" [disabled]="loading()">
+          @if (loading()) {
+            <span class="material-symbols-rounded spin">progress_activity</span>
+          } @else {
+            {{ mode() === 'signup' ? 'Crear cuenta' : 'Iniciar sesión' }}
+          }
+        </button>
+      </form>
+
+      @if (mode() === 'signup') {
+        <p class="switch-mode">¿Ya tenés cuenta? <button type="button" (click)="setMode('login')">Iniciá sesión</button></p>
+      } @else {
+        <p class="switch-mode">¿No tenés cuenta? <button type="button" (click)="setMode('signup')">Creá una</button></p>
+      }
+
       @if (errorMessage()) {
         <p class="error-msg">
           <span class="material-symbols-rounded">error</span>
           {{ errorMessage() }}
+        </p>
+      }
+
+      @if (infoMessage()) {
+        <p class="info-msg">
+          <span class="material-symbols-rounded">info</span>
+          {{ infoMessage() }}
         </p>
       }
 
